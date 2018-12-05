@@ -1,6 +1,11 @@
+#![feature(test)]
+
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+
+extern crate test;
+use test::Bencher;
 
 // v2 fixed
 fn strip(input:&Vec<u8>) -> Vec<u8> {
@@ -86,7 +91,7 @@ fn part1() {
 }
 
 #[allow(dead_code)]
-fn part2() {
+fn part2(use_strip2: bool) {
     let path = "C:\\Users\\Igascoigne\\advent2018\\dec_01_01\\input.txt";
     let file = match File::open(path) {
         Err(why) => panic!("couldn't open {}: {}", path, Error::description(&why)),
@@ -107,24 +112,26 @@ fn part2() {
                     let c0 = i as u8 + 'A' as u8;
                     let c1 = i as u8 + 'A' as u8 + 32u8;
                     result.retain(|&x| x != c0 && x != c1);
-                    let mut length= result.len();
-                    loop {
-                        result = strip(&result);
-                        let new_length = result.len();
-                        if new_length == length {
-                            break;
+
+                    if use_strip2 {
+                        let length = strip2(&result).len();
+                        if length < best_len {
+                            best_len = length;
                         }
-                        length = new_length;
+                    } else {
+                        let mut length = result.len();
+                        loop {
+                            result = strip(&result);
+                            let new_length = result.len();
+                            if new_length == length {
+                                break;
+                            }
+                            length = new_length;
+                        }
+                        if length < best_len {
+                            best_len = length;
+                        }
                     }
-                    if length < best_len {
-                        best_len = length;
-                    }
-                    /* faster
-                    let length = strip2(&result).len();
-                    if length < best_len {
-                        best_len = length;
-                    }
-                    */
                 }
                 line_count += 1;
                 println!("result: {}", best_len);
@@ -135,7 +142,17 @@ fn part2() {
     }
 }
 
+#[bench]
+fn bench_part2_strip(b: &mut Bencher) {
+    b.iter(|| part2(false));
+}
+
+#[bench]
+fn bench_part2_strip2(b: &mut Bencher) {
+    b.iter(|| part2(true));
+}
+
 fn main() {
-    part2();
+    part2(false);
     //println!("{}", String::from_utf8(strip(&"aA".to_string().into_bytes())).unwrap());
 }
