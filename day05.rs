@@ -152,7 +152,15 @@ fn bench_part2_strip2(b: &mut Bencher) {
     b.iter(|| part2(true));
 }
 
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_strip() {
+        use strip;
+        assert!(String::from_utf8(strip(&"aA".to_string().into_bytes())).unwrap().is_empty());
+    }
+}
+
 fn main() {
     part2(false);
-    //println!("{}", String::from_utf8(strip(&"aA".to_string().into_bytes())).unwrap());
 }
