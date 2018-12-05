@@ -2,12 +2,18 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+// v2 fixed
 fn strip(input:&Vec<u8>) -> Vec<u8> {
     let mut result = Vec::new();
-    let end = input.len()-1;
+    let end = input.len();
     let mut it = 0;
     while it < end {
         let i0 = input[it] as i32;
+        if it >= end-1 {
+            result.push(i0 as u8);
+            return result;
+        }
+
         let i1 = input[it+1] as i32;
         if (i0 - i1).abs() != 32 {
             result.push(i0 as u8);
@@ -16,7 +22,28 @@ fn strip(input:&Vec<u8>) -> Vec<u8> {
             it += 2;
         }
     }
-    result.push(input[end-1]);
+    return result;
+}
+
+// added after looking at work answers, stack version
+fn strip2(input:&Vec<u8>) -> Vec<u8> {
+    let mut result = Vec::new();
+    let end = input.len();
+    for it in 0..end {
+        let len = result.len();
+        if len == 0 {
+            result.push(input[it]);
+        } else {
+            let u0 = input[it];
+            let i0 = u0 as i32;
+            let i1 = result[len-1] as i32;
+            if (i0 - i1).abs() == 32 {
+                result.pop();
+            } else {
+                result.push(u0);
+            }
+        }
+    }
     return result;
 }
 
@@ -35,7 +62,8 @@ fn part1() {
             Ok(line) => {
                 assert_eq!(line_count, 0);
                 assert!(line.is_ascii());
-                let mut result = line.into_bytes();
+                let original_input = line.into_bytes();
+                let mut result = original_input.clone();
                 let mut length= result.len();
                 let mut passes = 0;
                 loop {
@@ -50,6 +78,7 @@ fn part1() {
                 line_count += 1;
                 println!("passes: {}", passes);
                 println!("result: {}", length);
+                println!("result2: {}", strip2(&original_input).len());
             }
             Err(e) => println!("err: {}", e)
         }
@@ -90,6 +119,12 @@ fn part2() {
                     if length < best_len {
                         best_len = length;
                     }
+                    /* faster
+                    let length = strip2(&result).len();
+                    if length < best_len {
+                        best_len = length;
+                    }
+                    */
                 }
                 line_count += 1;
                 println!("result: {}", best_len);
@@ -102,4 +137,5 @@ fn part2() {
 
 fn main() {
     part2();
+    //println!("{}", String::from_utf8(strip(&"aA".to_string().into_bytes())).unwrap());
 }
