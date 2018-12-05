@@ -4,6 +4,9 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+extern crate rayon;
+use rayon::prelude::*;
+
 extern crate test;
 use test::Bencher;
 
@@ -142,14 +145,50 @@ fn part2(use_strip2: bool) {
     }
 }
 
+fn part2_rayon() {
+    let path = "C:\\Users\\Igascoigne\\advent2018\\dec_01_01\\input.txt";
+    let file = match File::open(path) {
+        Err(why) => panic!("couldn't open {}: {}", path, Error::description(&why)),
+        Ok(file) => file,
+    };
+
+    let reader = BufReader::new(file);
+    for line in reader.lines() {
+        match line {
+            Ok(line) => {
+                assert!(line.is_ascii());
+                let original_input = line.into_bytes();
+                let mut lengths:[usize;26] = [0;26];
+                let result = (0..26).into_par_iter().map(|i| {
+                    let mut result = original_input.clone();
+                    let c0 = i as u8 + 'A' as u8;
+                    let c1 = i as u8 + 'A' as u8 + 32u8;
+                    result.retain(|&x| x != c0 && x != c1);
+                    return strip2(&result).len() as i32;
+                });
+                println!("result: {}", result.min().unwrap());
+
+            }
+            Err(e) => println!("err: {}", e)
+        }
+    }
+}
+
+/*
 #[bench]
 fn bench_part2_strip(b: &mut Bencher) {
     b.iter(|| part2(false));
 }
+*/
 
 #[bench]
 fn bench_part2_strip2(b: &mut Bencher) {
     b.iter(|| part2(true));
+}
+
+#[bench]
+fn bench_part2_strip2_rayon(b: &mut Bencher) {
+    b.iter(|| part2_rayon());
 }
 
 #[cfg(test)]
