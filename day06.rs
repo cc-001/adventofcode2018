@@ -170,7 +170,6 @@ fn part2(path:&str, total_dist:i32) -> i32 {
     let ymin = extents.2;
     let ymax = extents.3;
 
-    // this is a dumb algorithm, order is higher than needed should do simultaneous flood from the origins
     let dim = Grid::len(xmin, xmax, ymin, ymax);
     let mut grid = Grid {cell_flag: vec![UNVISITED; dim as usize], xmin:xmin, xmax:xmax, ymin:ymin, ymax:ymax};
     let dimx = grid.dimx();
