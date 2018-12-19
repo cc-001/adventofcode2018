@@ -4,3 +4,7 @@ Solutions to Advent of Code 2018 using the Rust programming language.  This is m
 For license see LICENSE.
 
 https://adventofcode.com/
+
+day17.rs output:
+
+![alt text](https://i.ibb.co/sqKHdQ6/input.gif)
